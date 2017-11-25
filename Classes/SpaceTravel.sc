@@ -94,7 +94,7 @@ SpaceTravel {
 	}
 
 	simplifiedText {
-		^"< % >".format(this.pruneString(text).removeMultipleWhitespace)
+		^"<% >".format(this.pruneString(text).removeMultipleWhitespace)
 	}
 
 	printOn { |stream|
