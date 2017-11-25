@@ -1,8 +1,6 @@
 
 Trip : Traversal {
 
-	var <>scale;
-
 
 	*newFrom { |traversal|
 		^super.new(traversal.transformations, traversal.directions, traversal.locations)
@@ -10,7 +8,7 @@ Trip : Traversal {
 
 	rotatedTransformationsAt { |index|
 		var tr = transformations[index];
-		^transformations.collect { |x, i| tr.mulMatrix(x) / scale }
+		^transformations.collect { |x, i| tr.mulMatrix(x) / scaling } // maybe the other way round
 	}
 
 	rotatedDirectionsAt { |index|
@@ -30,7 +28,7 @@ Trip : Traversal {
 			this.rotatedTransformationsAt(index),
 			this.rotatedDirectionsAt(index),
 			this.rotatedLocationsAt(index)
-		).scale_(scale)
+		)
 	}
 
 	++ { |traversal|
@@ -48,6 +46,14 @@ Trip : Traversal {
 			this.size.collect { |i|
 				this.rotateAt(i).fillSelf(depth - 1)
 			}.reduce('++')
+		}
+	}
+
+	printOn { |stream|
+		if(this.size < 20) {
+			this.superPerform(\printOn, stream)
+		} {
+			stream << this.class.name
 		}
 	}
 
