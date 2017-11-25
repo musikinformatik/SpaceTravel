@@ -1,7 +1,12 @@
 
+
+
+
 (
-var drawFunc, width, dur;
-a = SpaceTravel.readFile("traversals/HarmoniousHilbert2.hx".resolveRelative);
+var drawFunc, width = 300, dur = 0.001;
+var a = SpaceTravel("< [ 2 -1 } 1 [ 1 2 } 2 { 1 -2 ] -1 [ -2 -1 } >");
+var depth = 2;
+
 g = drawFunc = { |reihe, width, dur, color|
 	var j = 1;
 	var max, min, step, scale, points;
@@ -28,14 +33,12 @@ g = drawFunc = { |reihe, width, dur, color|
 
 };
 
-width = 300;
-dur = 0.1;
+
 w = Window("hilbert", Rect(340, 40, width + 40, width + 40));
 w.background = Color.white;
 w.front;
-a.traversal.verbose = true;
-a.traversal.standardize;
-w.drawFunc = w.drawFunc.addFunc(drawFunc.(a.traversal.generateFullPath(4), width, dur, Color.black));
+
+w.drawFunc = w.drawFunc.addFunc(drawFunc.(a.traversal.generateFullPath(depth), width, dur, Color.black));
 //w.drawFunc = w.drawFunc.addFunc(drawFunc.(a.traversal.generateFullPath(3), width, dur, Color.green));
 //w.drawFunc = w.drawFunc.addFunc(drawFunc.(a.traversal.generateFullPath(4), width, dur, Color.red));
 if(dur > 0) {
@@ -47,6 +50,14 @@ if(dur > 0) {
 
 
 
+
+
+
+a = SpaceTravel.readFile("traversals/HarmoniousHilbert2.hx".resolveRelative);
+a.traversal.transformations
+
+
+a = SpaceTravel("< { 2 1 ] 1 [ 1 2 } 2 { 1 -2 ] -1 [ -2 -1 } >");
 
 
 
@@ -62,6 +73,9 @@ a = SpaceTravel.readFile("traversals/HarmoniousHilbert2.hx".resolveRelative);
 
 )
 
+
+
+// a few othr tests
 
 
 a.traversal.verbose = true;
