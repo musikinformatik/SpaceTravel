@@ -108,8 +108,6 @@ Traversal {
 		^list
 	}
 
-
-
 	calcInitialMatrix { |depth|
 		var n = this.dimension;
 		^{ |i|

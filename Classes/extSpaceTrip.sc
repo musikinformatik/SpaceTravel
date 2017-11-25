@@ -39,7 +39,7 @@
 	}
 
 	postMatrix {
-		this.matrix2string("|").postln
+		this.matrix2string(" ").postln
 	}
 
 	// function: generating path from a movement, starting at point p
