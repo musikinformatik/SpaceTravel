@@ -42,6 +42,17 @@ TestArrayMatrixOps : UnitTest {
 
 	}
 
+	test_conversions {
+		var test = { |perm|
+			var perm2 = perm.permute2matrix.matrix2permute;
+			this.assertEquals(perm, perm2, "conversions between permutations and matrices should be invariant");
+		};
+		test.([2,3,-1]);
+		test.([2,1,-3]);
+		test.([1, 3, 2, 5, -4]);
+
+	}
+
 
 
 }
