@@ -34,7 +34,7 @@
 		^switch(shape.size,
 			1, { this.join(separator) },
 			2, { this.padAllStrings2.collect(_.join(separator)).join("\n") },
-			{ "[\n" ++ this.collect { |row| row.asCompileString } << "\n]" }
+			{ "[\n" ++ this.collect { |row| row.asCompileString } ++ "\n]" }
 		)
 	}
 
