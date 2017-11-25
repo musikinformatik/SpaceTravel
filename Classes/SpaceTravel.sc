@@ -49,24 +49,18 @@ SpaceTravel {
 
 	pruneString { |string|
 		var begin, end;
-		begin = string.find("\n<");
+		begin = string.find("<");
 		if(begin.isNil) {  Error("couldn't find an opening bracket '<'").throw };
-		string = string[begin+2..];
-		end = string.find("\n>");
+		string = string[begin+1..];
+		end = string.find(">");
 		if(end.isNil) { Error("couldn't find a closing bracket '>'").throw };
 		^string[..end-1]
 	}
 
 	locationCoordinates { |origin, scaleFactor = 1|
-		var p = origin ?? { 0.dup(dimension) };
-		^movements.collect { |move|
-			p = p.copy;
-			move.asArray.do { |each|
-				var i = each.abs - 1;
-				p[i] = p[i] + (scaleFactor.value(each) * each.sign)
-			};
-			p
-		}
+		origin = origin ?? { 0 ! dimension };
+		origin.postln;
+		^movements.collectMoves(origin, scaleFactor)
 	}
 
 	transformationCoordinates {
@@ -99,22 +93,15 @@ SpaceTravel {
 		}.reject(_.isEmpty)
 	}
 
+	simplifiedText {
+		^"< % >".format(this.pruneString(text).removeMultipleWhitespace)
+	}
+
 	printOn { |stream|
-		stream << this.class.name << "(\"\n";
-		stream << text << "\"\n)\n";
+		stream << this.class.name << "(";
+		stream << this.simplifiedText.asCompileString << ")\n";
 	}
 
 
 }
 
-
-/*
-// post some information
-		stream << Char.nl;
-		stream << "Locations:" << Char.nl;
-		stream << this.locations.collect(_.join(" ")).join(" | ") << Char.nl;
-		stream << "Transformations:" << Char.nl;
-		stream << permutations.collect(_.join(" ")).join(" | ") << Char.nl;
-		stream << "Directions:" << Char.nl;
-		stream << directions.join(" | ") << Char.nl;
-*/
