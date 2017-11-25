@@ -10,7 +10,7 @@ version 0.1
 Traversal {
 
 	var <>transformations, <>directions, <>locations;
-	var <>dimension, <>initialLocation;
+	var <>dimension, <>initialLocation, <>scaling;
 	var <>verbose = false;
 
 	*new { |transformations, directions, locations|
@@ -40,6 +40,7 @@ Traversal {
 		};
 
 		initialLocation = 0 ! dimension;
+		scaling = n ** dimension.reciprocal;
 
 		if(verbose) {
 			"\ntransformations:".postln;
@@ -53,36 +54,34 @@ Traversal {
 
 	}
 
-	findPoint { |indices, point, matrix, scale = 2|
+	findPoint { |indices, point, matrix|
 		var ci, i;
 		if(indices.isEmpty) { ^nil };
 		i = indices.first;
 		ci = locations[i];
 		point = point ?? { 0.dup(this.dimension) };
 		if(indices.size == 1) { ^ci + point };
-		matrix = matrix ?? { this.calcInitialMatrix(1, scale) };
+		matrix = matrix ?? { this.calcInitialMatrix(1) };
 		point = point + ci.rotatePoint(matrix);
-		matrix = transformations[i].mulMatrix(matrix) / scale;
-		^this.findPoint(indices.drop(1), point, matrix, scale)
+		matrix = transformations[i].mulMatrix(matrix) / scaling;
+		^this.findPoint(indices.drop(1), point, matrix)
 	}
 
+
 	// p, c, m, h, r
-	generatePath { |func, point, matrix, direction, depth, scale|
+	generatePath { |func, point, matrix, direction, depth|
 		var selector;
-		var sd = this.dimension ** scale;
 
 		if(depth <= 0) {
 			func.value(point, matrix, direction)
 		} {
-			if(sd != locations.size) { "locations of wrong size (%)".format(locations.size).warn };
-			if(sd != transformations.size) { "transformations of wrong size (%)".format(locations.size).warn };
 
 			selector = if(direction > 0) { \do } { \reverseDo };
-			sd.perform(selector) { |i|
+			this.size.perform(selector) { |i|
 
 				var ci = locations[i];
 				var tr = transformations[i];
-				var newMatrix = tr.mulMatrix(matrix) / scale;
+				var newMatrix = matrix.mulMatrix(tr) / scaling;
 				var newOrigin = point + ci.rotatePoint(matrix);
 				var newDirection = direction * directions[i];
 
@@ -93,22 +92,21 @@ Traversal {
 					if(depth == 1) { "---------> %\n\n".postf(newOrigin) };
 				};
 
-				this.generatePath(func, newOrigin, newMatrix, newDirection, depth - 1, scale)
+				this.generatePath(func, newOrigin, newMatrix, newDirection, depth - 1)
 			}
 		}
 	}
 
-	followPath { |func, depth, scale = 2|
-		var m = this.calcInitialMatrix(depth, scale);
+	followPath { |func, depth|
+		var m = this.calcInitialMatrix(depth);
 		var p = this.initialLocation;
-		this.generatePath(func, p, m, 1, depth, scale);
+		this.generatePath(func, p, m, 1, depth);
 	}
 
-	generateFullPath { |depth, scale = 2|
+	generateFullPath { |depth|
 
-		var sd = dimension ** scale;
-		var list = List.new(sd ** depth);
-		this.followPath({ |p| list.add(p) }, depth, scale);
+		var list = List.new(this.size * depth);
+		this.followPath({ |p| list.add(p) }, depth);
 		list = list.floorPath;
 
 		^list
@@ -116,11 +114,11 @@ Traversal {
 
 
 
-	calcInitialMatrix { |depth, scale|
+	calcInitialMatrix { |depth|
 		var n = this.dimension;
 		^{ |i|
 			{ |j|
-				if(i == j) { scale ** depth } { 0 }
+				if(i == j) { this.scaling ** depth } { 0 }
 			}.dup(n)
 		}.dup(n)
 	}
