@@ -101,19 +101,39 @@ b.generateFullPath(3);
 b.findPoint([0, 2, 0, 1, 1, 1]);
 
 
+// followPath
+
+b = SpaceTravel("< { 2 -1 ] 1 [ 1 2 } 2 { 1 -2 ] -1 [ -2 -1 } >").traversal;
 
 (
-~path = b.generateFullPath(3);
+Tdef(\x, {
+	loop {
+		b.followPath({ |point, matrix, direction|
+			[point, matrix, direction].postln;
+			0.1.wait;
+		}, 5)
+	}
+}).play
+)
+
+
+
+// make a map from points to indices
+(
+b = SpaceTravel("< { 2 -1 ] 1 [ 1 2 } 2 { 1 -2 ] -1 [ -2 -1 } >").traversal;
+~path = b.generateFullPath(4);
 ~coordinates = ~path.flat;
 ~size = ~coordinates.maxItem / 2+ 1;
 
 ~path.size;
 
-~space = { nil ! ~size } ! ~size;
-~path.do { |c, i| var x, y; #x, y = (c / 2).asInteger;  ~space.at(x).put(y, i) };
+~space = Array.fillND(~size ! b.dimension);
+~path.do { |c, i| var x, y; #x, y = (c / b.scaling).asInteger;  ~space.at(x).put(y, i) };
 
 ~space.postMatrix;"";
 )
+
+
 
 
 b = b.as(Trip);
