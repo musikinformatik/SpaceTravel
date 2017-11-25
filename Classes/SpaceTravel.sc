@@ -36,6 +36,7 @@ SpaceTravel {
 
 		transformStrings = transformStrings.collect(this.partitionString(_)).flatten(1);
 
+
 		#permutations, directions = this.parseTransformations(transformStrings);
 		movements = this.parseMovements(locationStrings);
 		dimension = movements.flat.abs.maxItem;
@@ -59,7 +60,6 @@ SpaceTravel {
 
 	locationCoordinates { |origin, scaleFactor = 1|
 		origin = origin ?? { 0 ! dimension };
-		origin.postln;
 		^movements.collectMoves(origin, scaleFactor)
 	}
 

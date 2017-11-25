@@ -27,11 +27,7 @@ Traversal {
 		dimension = transformations.first.size;
 
 		if(locations.size != n) {
-			if(n - locations.size == 1) {
-				locations = [0.dup(this.dimension)] ++ locations
-			} {
-				Error("locations and transformations should match: one location less").throw
-			}
+			Error("locations and transformations should match: one location less").throw
 		};
 
 		// backward traversals are encoded as refs.
@@ -123,6 +119,17 @@ Traversal {
 		}.dup(n)
 	}
 
+	printOn { |stream|
+		stream << this.class.name << "(";
+		transformations.do { |tr, i|
+			var d = directions[i];
+			stream << if(d > 0) { $[ } { ${ };
+			tr.matrix2permute.do(stream << _);
+			stream << if(d > 0) { $} } { $] };
+		};
+		stream << ")";
+	}
+
 
 }
-	
+

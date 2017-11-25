@@ -12,7 +12,7 @@
 		^(this * matrix).sum
 	}
 
-	// function: converting from a permutation form to a matrix
+	// converting from a permutation form to a matrix
 	permute2matrix {
 		var n = this.size;
 		^(1..n).collect { |i|
@@ -20,12 +20,12 @@
 		}
 	}
 
-	// function: inverse conversion
+	// converting from a matrix to a permutation
 	matrix2permute {
-		^this.flop.collect { |row|
+		^this.flop.collect { |row, j|
 			var index = row.detectIndex { |a| a != 0 };
-			if(index.isNil) { Error("incorrect format").throw };
-			index + 1 * (row[index].sign)
+			if(index.isNil) { Error("matrix has incorrect format: %".format(this)).throw };
+			(index + 1) * (row[index].sign)
 		}
 	}
 
