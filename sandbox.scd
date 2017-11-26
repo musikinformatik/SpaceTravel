@@ -36,11 +36,14 @@ g = { |w, reihe, dur, color|
 // draw some...
 (
 var dur = 0.01;
+a = SpaceTravel("< [ 2 -1 } 1 [ 1 2 } 2 { 1 -2 ] -1 [ -2 -1 } >");
+a.traversal.verbose = true;
+
 w = Window("hilbert", Rect(340, 40, 340, 340));
 w.background = Color.white;
 w.front;
 
-g.(w, a.traversal.generateFullPath(5).centerPath, dur, Color.black);
+g.(w, a.traversal.generateFullPath(2).centerPath, dur, Color.black);
 //g.(w, a.traversal.generateFullPath(3), dur, Color.green);
 //g.(w, a.traversal.generateFullPath(4), dur, Color.red);
 if(dur > 0) {

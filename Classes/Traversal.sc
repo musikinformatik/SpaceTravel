@@ -35,7 +35,7 @@ Traversal {
 			if(x.isKindOf(Ref)) { directions[i] = -1 }
 		};
 
-		initialLocation = 0 ! dimension;
+		initialLocation = (0.5 ! dimension);
 		scaling = n ** dimension.reciprocal;
 
 		if(verbose) {
@@ -82,9 +82,9 @@ Traversal {
 				var newDirection = direction * directions[i];
 
 				if(verbose) {
-					"c: % c_i: % matrix: %\nnew matrix: % new point: %\n\n"
+					"c: % c_i: % matrix: %\nnew matrix: % new point: % direction: % -> %\n\n"
 					.postf(point, ci, matrix.matrix2permute,
-						newMatrix.matrix2permute, newOrigin);
+						newMatrix.matrix2permute, newOrigin, direction, newDirection);
 					if(depth == 1) { "---------> %\n\n".postf(newOrigin) };
 				};
 

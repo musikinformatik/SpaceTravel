@@ -1,16 +1,65 @@
 + SequenceableCollection {
 
 	// matrix multiplication
+
 	mulMatrix { |other|
+		var transposed;
+		var out, size;
+
+
+		size = this.size;
+		out = Array.fill(size, { Array.new(size) });
+
+		transposed = other.flop;
+
+		/*
 		if(this.first.size != other.size) {
 			Error("matrices are incompatible:\n\n%\n\n%\n\n%".format(this, other)).throw
 		};
-		^this.collect { |row| (row * other).sum }
+		*/
+
+		this.do { | row, i |
+			size.do { | j |
+				var c = transposed[j];
+				if(c.notNil) {
+					out[i].add(sum(row * c))
+				}
+			};
+		};
+
+		^out
+	}
+
+	transposeMatrix {
+		^if(this[0].isSequenceableCollection) {
+			this.flop
+		} {
+			this.bubble.flop
+		}
 	}
 
 	rotatePoint { |matrix|
-		^(this * matrix).sum
+		var rowVector = matrix.size.collect { |i| [this[i]] };
+		var rotated = matrix.mulMatrix(rowVector);
+		^rotated.collect(_.unbubble)
 	}
+
+	// wrong
+	rotatePoint2 { |matrix|
+		var out, size;
+
+		size = this.size;
+		out = Array.newClear(size);
+
+		matrix.do { | row, i |
+			size.do { | j |
+				out.add(this[j] * row)
+			};
+		};
+
+		^out
+	}
+
 
 	// converting from a permutation form to a matrix
 	permute2matrix {

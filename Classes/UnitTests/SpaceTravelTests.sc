@@ -3,40 +3,53 @@
 TestArrayMatrixOps : UnitTest {
 
 
+
 	test_rotate {
-		var point = [-2, 1, 4];
-		var matrix = [
-			[0, 3],
-			[-2, -1],
-			[0, 4]
 
-		];
-		var rotated = point.rotatePoint(matrix);
-		var multipled = [point].mulMatrix(matrix).unbubble;
-		this.assertEquals(rotated, multipled, "rotation should be the same as matrix multiplication");
+		var test;
 
+		test = { |text, matrix, result|
+			var rotated = [1, 1].rotatePoint(matrix);
+			this.assertEquals(rotated, result, "rotation % should be correct".format(text));
 
+		};
+
+		[
+			["90° counter clockwise", [[0, -1], [1, 0]], [-1, 1]],
+			["180° counter clockwise",[[-1, 0], [0, -1]], [-1, -1]],
+			["270°counter clockwise", [[0, 1], [-1, 0]], [1, -1]]
+		].do { |each| test.(*each) }
 	}
 
+
+
+
 	test_matrixMul {
-		var a, b, x, y;
+		var a, b, c, x;
 
-		a = [
-			[1, 0, -2],
-			[0, 3, -1]
-
+		a =  [
+			[-1,  1,  4],
+			[ 6, -4,  2],
+			[-3,  5,  0],
+			[ 3,  7, -2]
 		];
 
 		b = [
-			[0, 3],
-			[-2, -1],
-			[0, 4]
+			[-1,  1,  4,  8],
+			[ 6,  9, 10,  2],
+			[11, -4,  5, -3]
+		];
 
+		c =  [
+			[51, -8, 26, -18],
+			[-8, -38, -6, 34],
+			[33, 42, 38, -14],
+			[17, 74, 72, 44]
 		];
 
 		x = mulMatrix(a, b);
-		y =  [ [ 0, -5 ], [ -6, -7 ] ];
-		this.assertEquals(x, y, "matrix multiplication should pass simple test");
+
+		this.assertEquals(x, c, "matrix multiplication should pass simple test");
 		this.assert(x != mulMatrix(b, a), "matrix multiplication should be noncommutative");
 
 
