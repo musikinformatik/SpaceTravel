@@ -3,10 +3,10 @@ SpaceTravel {
 
 	var <traversal;
 	var <permutations, <movements, <dimension;
-	var <text;
+	var <text, <>name;
 
-	*new { |string|
-		^super.new.parseString(string)
+	*new { |string, name|
+		^super.new.parseString(string).name_(name)
 	}
 
 	*readFile { |path|
@@ -19,6 +19,7 @@ SpaceTravel {
 			string = file.readAllString;
 		});
 		this.parseString(string);
+		name = path.basename.splitext.first;
 	}
 
 	parseString { |string|
