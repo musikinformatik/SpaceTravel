@@ -8,16 +8,17 @@ TestArrayMatrixOps : UnitTest {
 
 		var test;
 
-		test = { |text, matrix, result|
-			var rotated = [1, 1].rotatePoint(matrix);
+		test = { |text, point, matrix, result|
+			var rotated = point.rotatePoint(matrix);
 			this.assertEquals(rotated, result, "rotation % should be correct".format(text));
 
 		};
 
 		[
-			["90° counter clockwise", [[0, -1], [1, 0]], [-1, 1]],
-			["180° counter clockwise",[[-1, 0], [0, -1]], [-1, -1]],
-			["270°counter clockwise", [[0, 1], [-1, 0]], [1, -1]]
+			["90° counter clockwise", [1, 1], [[0, -1], [1, 0]], [-1, 1]],
+			["180° counter clockwise", [1, 1], [[-1, 0], [0, -1]], [-1, -1]],
+			["270°counter clockwise", [1, 1], [[0, 1], [-1, 0]], [1, -1]],
+			["90° three dimensions", [1, 0, 0], [[0, -1, 0], [1, 0, 0], [0, 0, 1]], [0, 1, 0]]
 		].do { |each| test.(*each) }
 	}
 
