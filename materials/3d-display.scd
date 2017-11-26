@@ -7,14 +7,15 @@ f = { |paths|
 
 
 	var width = 500, height = 400, rate = 0.005;
-	var w, u, downPoint, item;
+	var w, u, downPoint, downRot, downDistance, item;
 
 
 	w = Window("there is no place like space", Rect(128, 64, width, height), false)
 	.front;
 
 	u = Canvas3D(w, Rect(0, 0, width, height))
-	.background_(Color.black)
+	//.background_(Color.black)
+	.background_(Color.white)
 	.scale_(200)
 	.perspective_(0.4)
 	.distance_(1.8);
@@ -22,7 +23,8 @@ f = { |paths|
 	// add triangular spiral
 	u.add(
 		item = Canvas3DItem()
-		.color_(Color.green)
+		//.color_(Color.green)
+		.color_(Color.black)
 		.width_(0.5)
 		.paths_(paths)
 	);
@@ -38,6 +40,7 @@ f = { |paths|
 
 	u.mouseDownAction = { |v, x, y|
 		downPoint = [x, y];
+		downDistance = u.distance;
 	};
 
 	// spin canvas on mouse move
@@ -46,13 +49,13 @@ f = { |paths|
 		if(mod.isAlt) {
 			u.transforms = [
 				Canvas3D.mRotateY(dist[0] / 200 % 2pi),
-				Canvas3D.mRotateZ(dist[1] / -200 % 2pi)
+				//Canvas3D.mRotateZ(dist[1] / -200 % 2pi)
 			];
+			u.distance = dist[1].bilin(0, -200, 200, downDistance, 1, 20);
 		} {
 			u.transforms = [
 				Canvas3D.mRotateY(dist[0] / 200 % 2pi),
 				Canvas3D.mRotateX(dist[1] / -200 % 2pi)
-				//u.distance = dist[0] * 0.01
 			];
 		};
 		u.refresh;
@@ -64,9 +67,10 @@ f = { |paths|
 //f.([2000.collect {|i| sin(i).cubed.dup(3).rand }]);
 )
 
+(
 a = SpaceTravel.readFile("../traversals/HarmoniousHilbert3.hx".resolveRelative);
 x = f.([a.traversal.generateFullPath(3).centerPath] * 0.1);
-
+)
 
 
 (
