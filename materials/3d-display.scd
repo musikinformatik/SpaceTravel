@@ -72,6 +72,11 @@ a = SpaceTravel.readFile("../traversals/HarmoniousHilbert3.hx".resolveRelative);
 x = f.([a.traversal.generateFullPath(3).centerPath] * 0.1);
 )
 
+(
+a = SpaceTravel.readFile("../traversals/InsideOut3.hx".resolveRelative);
+x = f.([a.traversal.generateFullPath(3).centerPath] * 0.1);
+)
+
 
 (
 a = SpaceTravel.readFile("../traversals/HarmoniousHilbert2.hx".resolveRelative);
