@@ -44,22 +44,6 @@
 		^rotated.collect(_.unbubble)
 	}
 
-	// wrong
-	rotatePoint2 { |matrix|
-		var out, size;
-
-		size = this.size;
-		out = Array.newClear(size);
-
-		matrix.do { | row, i |
-			size.do { | j |
-				out.add(this[j] * row)
-			};
-		};
-
-		^out
-	}
-
 
 	// converting from a permutation form to a matrix
 	permute2matrix {
