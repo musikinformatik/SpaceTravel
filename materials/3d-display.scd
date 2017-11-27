@@ -3,21 +3,21 @@
 Quarks.install("Canvas3D");
 
 (
-f = { |paths|
+f = { |paths, title|
 
 
 	var width = 500, height = 400, rate = 0.005;
-	var w, u, downPoint, downRot, downDistance, item;
+	var w, u, downPoint, downRot, downDistance, downPerspective, item;
 
 
-	w = Window("there is no place like space", Rect(128, 64, width, height), false)
+	w = Window(title ? "there is no place like space", Rect(128, 64, width, height), false)
 	.front;
 
 	u = Canvas3D(w, Rect(0, 0, width, height))
 	//.background_(Color.black)
 	.background_(Color.white)
 	.scale_(200)
-	.perspective_(0.4)
+	.perspective_(0.1)
 	.distance_(1.8);
 
 	// add triangular spiral
@@ -41,6 +41,11 @@ f = { |paths|
 	u.mouseDownAction = { |v, x, y|
 		downPoint = [x, y];
 		downDistance = u.distance;
+		downPerspective = u.perspective;
+	};
+
+	u.mouseUpAction = {
+		downPerspective = downDistance = nil;
 	};
 
 	// spin canvas on mouse move
@@ -48,9 +53,10 @@ f = { |paths|
 		var dist = downPoint - [x, y];
 		if(mod.isAlt) {
 			u.transforms = [
-				Canvas3D.mRotateY(dist[0] / 200 % 2pi),
-				//Canvas3D.mRotateZ(dist[1] / -200 % 2pi)
+				//Canvas3D.mRotateY(dist[0] / 200 % 2pi),
+				Canvas3D.mRotateZ(dist[1] / -200 % 2pi)
 			];
+			//u.perspective = dist[0].bilin(0, -200, 200, downPerspective, 0, 0.9);
 			u.distance = dist[1].bilin(0, -200, 200, downDistance, 1, 20);
 		} {
 			u.transforms = [
@@ -69,19 +75,19 @@ f = { |paths|
 
 (
 a = SpaceTravel.readFile("../traversals/HarmoniousHilbert3.hx".resolveRelative);
-x = f.([a.traversal.generateFullPath(3).centerPath] * 0.1);
+x = f.([a.traversal.generateFullPath(3).centerPath] * 0.1, a.name);
 )
 
 (
 a = SpaceTravel.readFile("../traversals/InsideOut3.hx".resolveRelative);
-x = f.([a.traversal.generateFullPath(3).centerPath] * 0.1);
+x = f.([a.traversal.generateFullPath(3).centerPath] * 0.1, a.name);
 )
 
 
 (
 a = SpaceTravel.readFile("../traversals/HarmoniousHilbert2.hx".resolveRelative);
 p = a.traversal.generateFullPath(4).collect { |x| x ++ 10.rand };
-f.([p.centerPath] * 0.1);
+f.([p.centerPath] * 0.1, a.name);
 )
 
 

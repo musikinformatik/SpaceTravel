@@ -73,7 +73,7 @@ p.(SpaceTravel.readFile("traversals/HarmoniousHilbert2.hx".resolveRelative), 4);
 p.(SpaceTravel.readFile("traversals/DoubleGray2.hx".resolveRelative), 4);
 p.(SpaceTravel.readFile("traversals/DoubleGray2.hx".resolveRelative), 4);
 p.(SpaceTravel.readFile("traversals/Peano2.hx".resolveRelative), 3, 0.01);
-p.(SpaceTravel.readFile("traversals/InsideOut2.hx".resolveRelative), 3, 0.01);
+p.(SpaceTravel.readFile("traversals/InsideOut2.hx".resolveRelative), 5, 0);
 
 
 
