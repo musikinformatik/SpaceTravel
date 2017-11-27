@@ -7,9 +7,9 @@ Quarks.install("/Volumes/data/sc/quarks/SpaceTravel");
 (
 g = { |w, reihe, dur, color|
 	var j = 1;
-	var max, min, step, scale, points;
+	var max, min, step, scale, points, zoomPoint;
 	var width = w.view.bounds.width * 0.9;
-	var downPoint, downZoom, zoom = 1;
+	var downPoint = Point(1, 1) * width / 2, downZoom = 0, zoom = 0;
 
 	max = reihe.flat.maxItem;
 	min = reihe.flat.minItem;
@@ -20,28 +20,41 @@ g = { |w, reihe, dur, color|
 		Point(*pair)
 	};
 
-	 w.drawFunc = w.drawFunc.addFunc({
+	zoomPoint = { |point|
+		var dist = point - downPoint;
+		point + (zoom * dist);
+	};
+
+	w.drawFunc = w.drawFunc.addFunc({
+		var p;
 		Pen.matrix = [1, 0, 0, -1, 20 , width + 20];
 		Pen.strokeColor = color;
 		Pen.smoothing = false;
 		Pen.width = 1;
-		Pen.moveTo(points[0] * zoom);
-		if(dur > 0) { points.keep(j) } { points }.do { |point| Pen.lineTo(point * zoom) };
+		Pen.moveTo(zoomPoint.(points.first));
+		p = if(dur > 0) { points.keep(j) } { points };
+
+		p.do { |point| Pen.lineTo(zoomPoint.(point)) };
 
 		Pen.stroke;
 		j = j + 1;
 	});
 
-	w.view.mouseDownAction = { |v, x, y| downPoint = [x, y]; downZoom = zoom };
+	w.view.mouseDownAction = { |v, x, y|
+		downPoint = Point(x, y);
+	};
+
 	w.view.mouseMoveAction = { |v, x, y|
 		var dist;
 		if(downPoint.notNil) {
-			dist = y - downPoint[1];
-			zoom = downZoom + (dist  / 500);
+			dist = y - downPoint.y;
+			zoom = downZoom + 1 * (dist  / 500);
 			w.refresh;
 		}
 	};
-	w.view.mouseUpAction = { |v, x, y| downPoint = nil };
+	w.view.mouseUpAction = { |v, x, y|
+		downZoom = zoom;
+	};
 
 };
 
@@ -52,7 +65,7 @@ p = { |travel, depth, dur = 0, width = 340|
 
 	g.(w, travel.traversal.generateFullPath(depth), dur, Color.black);
 	if(dur > 0) {
-		fork({ while { w.isClosed.not } { dur.wait; w.refresh; } }, AppClock)
+		fork({ while { w.isClosed.not } { dur.wait; w.refresh } }, AppClock)
 	};
 };
 )
