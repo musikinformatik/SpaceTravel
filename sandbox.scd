@@ -25,6 +25,7 @@ g = { |w, reihe, dur, color|
 		point + (zoom * dist);
 	};
 
+
 	w.drawFunc = w.drawFunc.addFunc({
 		var p;
 		Pen.matrix = [1, 0, 0, -1, 20 , width + 20];
@@ -34,7 +35,9 @@ g = { |w, reihe, dur, color|
 		Pen.moveTo(zoomPoint.(points.first));
 		p = if(dur > 0) { points.keep(j) } { points };
 
-		p.do { |point| Pen.lineTo(zoomPoint.(point)) };
+		p.do { |point|
+				Pen.lineTo(zoomPoint.(point))
+		};
 
 		Pen.stroke;
 		j = j + 1;
@@ -58,15 +61,19 @@ g = { |w, reihe, dur, color|
 
 };
 
-p = { |travel, depth, dur = 0, width = 340|
-	var w = Window(travel.name ? "path", Rect(340, 40, 340, 340));
+z = { |name, path, dur = 0, width = 340|
+	var w = Window(name, Rect(340, 40, 340, 340));
 	w.background = Color.white;
 	w.front;
 
-	g.(w, travel.traversal.generateFullPath(depth), dur, Color.black);
+	g.(w, path, dur, Color.black);
 	if(dur > 0) {
 		fork({ while { w.isClosed.not } { dur.wait; w.refresh } }, AppClock)
 	};
+};
+
+p = { |travel, depth, dur = 0, width|
+	z.(travel.name ? "plan", travel.traversal.generateFullPath(depth), dur, width)
 };
 )
 
@@ -124,8 +131,37 @@ a.traversal.locations
 [2,3,-1].permute2matrix.matrix2permute
 
 
-// running the unit tests
-TestArrayMatrixOps.run;
+
+b = SpaceTravel("< { 2 -1 ] 1 [ 1 2 } 2 { 1 -2 ] -1 [ -2 -1 } >").traversal;
+b.at([0, 1, 0]);
+
+
+b.at([0, 2, 0, 1, 1, 1]);
+b.at([0, 2, 0, 1, 1, 10]); // should throw an error
+
+b.wrapAt([0, 2, 0, 1, 1, 10]);
+
+b.wrapAt([0, 2, (0..3), 1, 1, 1]);
+
+// benchmarking
+i = { rrand(0, 6) } ! 10;
+bench { 100.do { b.wrapAt(i) } };
+i = { rrand(0, 6) } ! 3;
+bench { 100.do { b.wrapAt(i) } };
+
+
+
+z.("random parts", { b.findPoint() }.dup(200));
+(
+z.("random parts", {
+	var c0 = { b.size.rand }.dup(rrand(1, 8));
+	{
+		c0[c0.lastIndex] = c0[c0.lastIndex] + 1;
+		b.findPoint(c0);
+	}.dup(30);
+}.dup(2).flatten(1));
+)
+
 
 
 // a few other tests
@@ -140,13 +176,14 @@ b.verbose = false;
 
 b.generateFullPath(1);
 b.generateFullPath(3);
-b.findPoint([0, 2, 0, 1, 1, 1]);
 
 
 
 // followPath
 
 b = SpaceTravel("< { 2 -1 ] 1 [ 1 2 } 2 { 1 -2 ] -1 [ -2 -1 } >").traversal;
+
+b = SpaceTravel.readFile("traversals/Peano2.hx".resolveRelative).traversal;
 
 (
 SynthDef(\x, { |out, freq, sustain, amp = 0.1|
@@ -161,7 +198,7 @@ SynthDef(\x, { |out, freq, sustain, amp = 0.1|
 
 Tdef(\x, {
 	b.followPath({ |point, matrix, direction|
-		var note = point + 30;
+		var note = point.fold(-20, 20) + 30;
 		(instrument: \x, note: note, out: [0, 1], sustain: 0.2).play;
 		0.1.wait;
 	}, 4);
@@ -172,7 +209,7 @@ Tdef(\x, {
 Tdef(\y, {
 	2.do {
 		b.followPath({ |point, matrix, direction|
-			var note = point + 30 - 12;
+			var note = point.fold(-20, 20) + 30 - 12;
 			(instrument: \x, note: note, out: [0, 1], sustain: 2.2).play;
 			(0.1 * (b.scaling ** 2 * 2)).wait;
 		}, 2);
@@ -194,25 +231,56 @@ Tdef(\x, {
 )
 
 
-// make a map from points to indices
-(
+// 2-space
+
 b = SpaceTravel("< { 2 -1 ] 1 [ 1 2 } 2 { 1 -2 ] -1 [ -2 -1 } >").traversal;
-~path = b.generateFullPath(4);
-~coordinates = ~path.flat;
-~size = ~coordinates.maxItem / 2 + 1;
+b.fillSpace(4, { |c, i| i }).postMatrix;""
+b.fillSpace(5, { |c, i| i }).postMatrix;""
 
-~path.size;
 
-~space = Array.fillND(~size ! b.dimension);
-~path.do { |c, i| var x, y; #x, y = (c / b.scaling).asInteger;  ~space.at(x).put(y, i) };
-
-~space.postMatrix;"";
-
-~project = { |x, y| ~path @ (~space @@ x @@ y) };
+(
+x = b.fillSpace(4, { |point, index, matrix, direction|
+	(
+		index: index,
+		matrix:matrix,
+		direction:direction,
+		point: point
+	)
+})
 )
 
-~project.(34, 125);
 
+// 4-space
+
+b = SpaceTravel.readFile("traversals/DoubleGray4.hx".resolveRelative).traversal;
+b.fillSpace(2, { |c, i| i });
+x = b.fillSpace(3, { |c, i| i }); // higher than 3 will take lots of time.
+
+
+(
+x = b.fillSpace(3, { |point, index, matrix, direction|
+	(
+		index: index,
+		matrix:matrix,
+		direction:direction,
+		point: point
+	)
+})
+)
+
+
+x.slice(3, 4, 5, 1)
+x.deepAt([3, 4, 5, 1])
+
+bench { 100.do { x.slice(3, 4, 5, 1) } }
+bench { 100.do { x.deepAt([3, 4, 5, 1]) } }
+
+
+
+[[1, 2, 3]].deepPut([0, 1], 99);
+[[1, 2, 3]].deepAt([0, 1]);
+
+Array.fillND(2 ! 3);
 
 
 
@@ -229,5 +297,49 @@ c.locations
 
 // more instances is very inefficient
 
+(
+a =  [
+	[-1,  1,  4],
+	[ 6, -4,  2],
+	[-3,  5,  0],
+	[ 3,  7, -2]
+];
 
+b = [
+	[-1,  1,  4,  8],
+	[ 6,  9, 10,  2],
+	[11, -4,  5, -3]
+];
+
+c =  [
+	[51, -8, 26, -18],
+	[-8, -38, -6, 34],
+	[33, 42, 38, -14],
+	[17, 74, 72, 44]
+];
+
+(a *.x b.flop).collect(_.sum).clump(a.size)
+)
+
+
+
+// running the unit tests
+TestArrayMatrixOps.run;
+
+(a *.x b).clump(a.size).sum
+
+
+mmult :: Num a => [[a]] -> [[a]] -> [[a]]
+mmult a b = [ [ sum $ zipWith (*) ar bc | bc <- (transpose b) ] | ar <- a ]
+
+
+all {: sum(x * y), x<-a, y<-b.flop }.clump(a.size)
+
+point.sum { |x| x * m }.clump(m.size)
+
+[
+	[0, 10]
+	[2, 3]
+	[7, 8]
+]
 
