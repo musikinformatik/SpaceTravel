@@ -3,14 +3,10 @@
 	// matrix multiplication
 
 	mulMatrix { |other|
-		var transposed;
-		var out, size;
 
-
-		size = this.size;
-		out = Array.fill(size, { Array.new(size) });
-
-		transposed = other.flop;
+		var size = this.size;
+		var out = Array.fill(size, { Array.new(size) });
+		var transposed = other.flop;
 
 		/*
 		if(this.first.size != other.size) {
@@ -30,6 +26,37 @@
 		^out
 	}
 
+	applyMatrixToPoint { |point|
+
+		var size = this.size;
+		var out = Array.new(size);
+		var transposed = [point];
+
+
+		this.do { | row, i |
+			size.do { | j |
+				var c = transposed[j];
+				if(c.notNil) {
+					out.add(sum(row * c))
+				}
+			};
+		};
+
+		^out
+	}
+
+	rotatePoint { |matrix|
+		^matrix.applyMatrixToPoint(this)  // "this" is the point
+	}
+
+	/*
+	rotatePoint2 { |matrix|
+		var rowVector = matrix.size.collect { |i| [this[i]] };
+		var rotated = matrix.mulMatrix(rowVector);
+		^rotated.collect { |x| x[0] }
+	}
+	*/
+
 	transposeMatrix {
 		^if(this[0].isSequenceableCollection) {
 			this.flop
@@ -38,12 +65,23 @@
 		}
 	}
 
-	rotatePoint { |matrix|
-		var rowVector = matrix.size.collect { |i| [this[i]] };
-		var rotated = matrix.mulMatrix(rowVector);
-		^rotated.collect(_.unbubble)
+	// deepAt works like slice for single indices, so it is much more efficient
+
+	deepAt { |indices|
+		var res = this;
+		indices.do { |i|
+			res = res[i]
+		};
+		^res
 	}
 
+	deepPut { |indices, value|
+		var res = this;
+		indices.drop(-1).do { |i|
+			res = res[i]
+		};
+		^res.put(indices.last, value)
+	}
 
 	// converting from a permutation form to a matrix
 	permute2matrix {
@@ -75,7 +113,7 @@
 		this.matrix2string(" ").postln
 	}
 
-	// function: generating path from a movement, starting at point p
+	// generate path from a movement, starting at point origin
 	collectMoves { |origin, scaleFactor = 1|
 		var p = origin;
 		^([origin] ++ this.collect { |move|
