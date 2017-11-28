@@ -47,22 +47,44 @@ Traversal {
 			locations.postln;
 		};
 
-
 	}
 
-	findPoint { |indices, point, matrix|
+	// indexing
+
+	wrapAt { |indices|
+		^this.at(indices % this.size)
+	}
+
+	at { |indices|
+		var m = this.calcInitialMatrix(1); // scaling down here.
+		^if(indices.containsSeqColl) {
+			indices.flop.collect { |is| // not the most efficient way, but works for now.
+				this.findPoint(is, matrix: m)
+			}
+		} {
+			this.findPoint(indices, matrix: m)
+		}
+	}
+
+	findPoint { |indices, point, matrix, direction = 1|
 		var ci, i;
-		if(indices.isEmpty) { ^nil };
+		if(indices.isEmpty) { ^point };
 		i = indices.first;
+		if(i >= this.size) {
+			Error("index (%) too large for given space (size: %)".format(i, this.size)).throw
+		};
+		if(direction < 0) { i = transformations.size - 1 - i }; // check if wrapping should be considered here
 		ci = locations[i];
-		point = point ?? { 0.dup(this.dimension) };
+		point = point ?? { this.initialLocation };
 		if(indices.size == 1) { ^ci + point };
-		matrix = matrix ?? { this.calcInitialMatrix(1) };
+		matrix = matrix ?? { this.calcInitialMatrix(indices.size) };
 		point = point + ci.rotatePoint(matrix);
-		matrix = transformations[i].mulMatrix(matrix) / scaling;
-		^this.findPoint(indices.drop(1), point, matrix)
+		matrix = matrix.mulMatrix(transformations[i]) / scaling;
+		^this.findPoint(indices.drop(1), point, matrix, direction)
 	}
 
+
+	// path generation
 
 	// p, c, m, h, r
 	generatePath { |func, point, matrix, direction, depth|
@@ -93,11 +115,6 @@ Traversal {
 		}
 	}
 
-	followPath { |func, depth|
-		var m = this.calcInitialMatrix(depth);
-		var p = this.initialLocation;
-		this.generatePath(func, p, m, 1, depth);
-	}
 
 	generateFullPath { |depth|
 
@@ -107,6 +124,37 @@ Traversal {
 
 		^list
 	}
+
+	followPath { |func, depth|
+		var m = this.calcInitialMatrix(depth);
+		var p = this.initialLocation;
+		this.generatePath(func, p, m, 1, depth);
+	}
+
+
+	fillSpace { |depth, func|
+		var space = Array.fillND((scaling ** depth - 1) ! this.dimension);
+		var mul = scaling.reciprocal;
+		var n = this.size * depth;
+
+		var coords = List.new(n);
+		var values = List.new(n);
+		this.followPath({ |point, matrix, direction|
+			point = (point * mul).asInteger;
+			coords.add(point);
+			values.add([matrix, direction]);
+
+		}, depth);
+
+		coords.floorPath.do { |c, i|
+			var v = values[i];
+			var w = func.valueArray(c, i, v);
+			space.deepPut(c, w)
+		};
+
+		^space
+	}
+
 
 	calcInitialMatrix { |depth|
 		var n = this.dimension;

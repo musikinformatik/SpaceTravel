@@ -1,6 +1,7 @@
 
 Trip : Traversal {
 
+	var <>parent;
 
 	*newFrom { |traversal|
 		^super.new(traversal.transformations, traversal.directions, traversal.locations)
