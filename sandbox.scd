@@ -2,6 +2,9 @@
 // to run the example, first install SpaceTravel
 Quarks.install("/Volumes/data/sc/quarks/SpaceTravel");
 
+//
+Quarks.install("https://github.com/musikinformatik/SpaceTravel");
+
 
 // two useful functions for display
 (
@@ -36,7 +39,7 @@ g = { |w, reihe, dur, color|
 		p = if(dur > 0) { points.keep(j) } { points };
 
 		p.do { |point|
-				Pen.lineTo(zoomPoint.(point))
+			Pen.lineTo(zoomPoint.(point))
 		};
 
 		Pen.stroke;
@@ -85,12 +88,18 @@ pathMatch("traversals/*".resolveRelative).collect { |x| x.basename.postln }; "";
 unixCmd("open" + "traversals/HarmoniousHilbert2.hx".resolveRelative);
 
 
+
+SpaceTravel("< { 2 -1 ] 1 [ 1 2 } 2 { 1 -2 ] -1 [ -2 -1 } >").traversal.generateFullPath(3).cs
+
 // some drawings
-p.(SpaceTravel("< { 2 -1 ] 1 [ 1 2 } 2 { 1 -2 ] -1 [ -2 -1 } >"), 3);
+p.(SpaceTravel("< { 2 -1 ] 1 [ 1 2 } 2 { 1 -2 ] -1 [ -2 -1 } >"), 5, 0.01);
+
+
+
 p.(SpaceTravel("< { 2 -1 ] 1 [ 1 2 } 2 { 1 -2 ] -1 [ -2 -1 } >"), 6);
 p.(SpaceTravel.readFile("traversals/BaseCamp2.hx".resolveRelative), 4, 0.01);
 p.(SpaceTravel.readFile("traversals/HarmoniousHilbert2.hx".resolveRelative), 4);
-p.(SpaceTravel.readFile("traversals/DoubleGray2.hx".resolveRelative), 4);
+p.(SpaceTravel.readFile("traversals/DoubleGray2.hx".resolveRelative), 4, 0.01);
 p.(SpaceTravel.readFile("traversals/DoubleGray2.hx".resolveRelative), 4);
 p.(SpaceTravel.readFile("traversals/Peano2.hx".resolveRelative), 3, 0.01);
 p.(SpaceTravel.readFile("traversals/InsideOut2.hx".resolveRelative), 5, 0);
@@ -179,11 +188,52 @@ b.generateFullPath(3);
 
 
 
+
+
+
 // followPath
 
 b = SpaceTravel("< { 2 -1 ] 1 [ 1 2 } 2 { 1 -2 ] -1 [ -2 -1 } >").traversal;
 
 b = SpaceTravel.readFile("traversals/Peano2.hx".resolveRelative).traversal;
+
+
+
+(
+SynthDef(\x, { |out, freq, sustain, amp = 0.1|
+
+	var env, son, trig;
+	env = EnvGen.ar(Env.perc(0.01, sustain, amp * AmpComp.kr(freq, 100, 0.3)), doneAction:2);
+	trig = LPF.ar(Impulse.ar(0), freq) * PinkNoise.ar(0.1, 1);
+	son = Klank.ar(`[[1, 1.25, 1.5], [1], [sustain]], freqscale: freq, input: trig);
+	OffsetOut.ar(out, son * env);
+
+}).add;
+
+Tdef(\x, {
+	var depth = 6;
+	var offset = (2 ** depth - 1);
+	b.initialLocation = 0 ! b.dimension;
+	b.followPath({ |point, matrix, direction|
+		var note;
+		point = (point + offset) / 2;
+		note  = point + 10;
+		[point, matrix, direction].postln;
+		(
+			instrument: \x,
+			note: note,
+			out: [0, 5],
+			sustain: 0.03
+		).play;
+		0.01.wait;
+	}, depth);
+
+}).play;
+)
+
+
+(instrument:\x, freq:600, sustain: 3).play;
+
 
 (
 SynthDef(\x, { |out, freq, sustain, amp = 0.1|
@@ -238,7 +288,13 @@ b.fillSpace(4, { |c, i| i }).postMatrix;""
 b.fillSpace(5, { |c, i| i }).postMatrix;""
 
 
+
+b.fillSpace(2, { |...args| args.postln })
+b.generateFullPath(2)
+
+
 (
+b.fillSpace(4, { |c, i| i }).postMatrix;
 x = b.fillSpace(4, { |point, index, matrix, direction|
 	(
 		index: index,
@@ -248,6 +304,33 @@ x = b.fillSpace(4, { |point, index, matrix, direction|
 	)
 })
 )
+
+[1]
+
+x.collect { |y| y.collect { |e| e[\point] } }.postMatrix
+
+(
+Tdef(\x, {
+	x.do { |y, i|
+		y.do { |e|
+			var freq  = e[\index].linexp(0, 255, 120, 10000);
+			(
+				instrument: \x,
+				freq: freq,
+				out: i,
+				sustain: 0.03
+			).play;
+			0.1.wait;
+		};
+		1.wait;
+	}
+
+}).play
+)
+
+
+
+
 
 
 // 4-space
