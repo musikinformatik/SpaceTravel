@@ -36,6 +36,10 @@ Traversal {
 		};
 
 		initialLocation = (0.5 ! dimension);
+
+		// for 2 ** d
+
+
 		scaling = n ** dimension.reciprocal;
 
 		if(verbose) {
@@ -133,14 +137,13 @@ Traversal {
 
 
 	fillSpace { |depth, func|
-		var space = Array.fillND((scaling ** depth - 1) ! this.dimension);
+		var space = Array.fillND((scaling ** depth) ! this.dimension);
 		var mul = scaling.reciprocal;
 		var n = this.size * depth;
 
 		var coords = List.new(n);
 		var values = List.new(n);
 		this.followPath({ |point, matrix, direction|
-			point = (point * mul).asInteger;
 			coords.add(point);
 			values.add([matrix, direction]);
 
@@ -148,8 +151,9 @@ Traversal {
 
 		coords.floorPath.do { |c, i|
 			var v = values[i];
-			var w = func.valueArray(c, i, v);
-			space.deepPut(c, w)
+			var point = (c * mul).asInteger;
+			var w = func.valueArray(point, i, v);
+			space.deepPut(point, w)
 		};
 
 		^space
