@@ -112,6 +112,7 @@ a = SpaceTravel.readFile("traversals/BaseCamp2.hx".resolveRelative);
 a.traversal
 
 
+
 a.traversal.transformations
 a.traversal.directions
 a.traversal.locations
@@ -138,6 +139,17 @@ a.traversal.locations
 )
 
 [2,3,-1].permute2matrix.matrix2permute
+
+
+
+// arbitrary path
+a = SpaceTravel("< { 2 -1 ] 1 [ 1 2 } 2 { -1 2 ] 1 { 1 -2 ] -2 [ -2 -1 } >")
+a.traversal.generateFullPath(2);
+
+p.(a, 1);
+p.(a, 2);
+p.(a, 3);
+p.(a, 6);
 
 
 
@@ -189,13 +201,40 @@ b.generateFullPath(3);
 
 
 
+b = SpaceTravel.readFile("traversals/Peano2.hx".resolveRelative).traversal;
+
+p = b.generateFullPath(4);
+p.size
+
+p[300..600]
 
 
-// followPath
+
+/*
+
+Three dimensional traversal Peano 3
+
+*/
+
 
 b = SpaceTravel("< { 2 -1 ] 1 [ 1 2 } 2 { 1 -2 ] -1 [ -2 -1 } >").traversal;
 
-b = SpaceTravel.readFile("traversals/Peano2.hx".resolveRelative).traversal;
+b = SpaceTravel.readFile("traversals/Peano3.hx".resolveRelative).traversal;
+
+p = b.generateFullPath(3); // wait a little.
+
+
+// how to get max and min?
+[p[0][0], p[1][0], p[2][0]]
+
+p.collect { |each| each[0] }
+p.collect { |each| each[1] }
+p.collect { |each| each[2] } // nilnilnil
+p.flop[0]
+
+p.flat
+p.flat.maxItem
+p.flat.minItem
 
 
 
@@ -203,33 +242,139 @@ b = SpaceTravel.readFile("traversals/Peano2.hx".resolveRelative).traversal;
 SynthDef(\x, { |out, freq, sustain, amp = 0.1|
 
 	var env, son, trig;
-	env = EnvGen.ar(Env.perc(0.01, sustain, amp * AmpComp.kr(freq, 100, 0.3)), doneAction:2);
+	env = EnvGen.ar(Env.sine(sustain, amp * 10 * AmpComp.kr(freq, 100, 0.3)), doneAction:2);
 	trig = LPF.ar(Impulse.ar(0), freq) * PinkNoise.ar(0.1, 1);
 	son = Klank.ar(`[[1, 1.25, 1.5], [1], [sustain]], freqscale: freq, input: trig);
 	OffsetOut.ar(out, son * env);
 
 }).add;
+)
 
+
+(
+var max, min;
+max = p.flat.maxItem;
+min = p.flat.minItem;
 Tdef(\x, {
-	var depth = 6;
-	var offset = (2 ** depth - 1);
-	b.initialLocation = 0 ! b.dimension;
-	b.followPath({ |point, matrix, direction|
-		var note;
-		point = (point + offset) / 2;
-		note  = point + 10;
-		[point, matrix, direction].postln;
+
+	p.do { |point|
+		var freq;
+		freq = point.linlin(min, max, 500, 9000);
+		//[point, matrix, direction].postln;
 		(
 			instrument: \x,
-			note: note,
-			out: [0, 5],
-			sustain: 0.03
+			freq: freq,
+			out: [0, 1, 2], // [0, 1, 1] // at home
+			sustain: 0.01
 		).play;
 		0.01.wait;
-	}, depth);
-
+	}
 }).play;
 )
+)
+
+
+TempoClock.default.tempo = 4;
+
+
+(
+SynthDef(\x, { |out, freq, sustain, amp = 0.1|
+
+	var env, son, trig;
+	freq = freq.expexp(500, 9000, 9000, 500);
+	env = EnvGen.ar(Env.sine(sustain, amp * 10 * AmpComp.kr(freq, 100, 0.3)), doneAction:2);
+	trig = LPF.ar(Impulse.ar(0), freq) * PinkNoise.ar(0.1, 1);
+	son = Klank.ar(`[[1, 1.25, 1.5], [1], [sustain]], freqscale: freq, input: trig);
+	OffsetOut.ar(out, son * env);
+
+}).add;
+)
+
+
+
+(
+SynthDef(\x, { |out, freq, sustain, amp = 0.1|
+
+	var env, son, trig, f0;
+	f0 = freq.explin(500, 9000, 0, 1);
+	f0 = f0 * (2 ** MouseX.kr(1, 18, 1).round(1).lag(1)) % 1;
+//	f0 = IEnvGen.kr(Env([0, 1, 0], 1/2), f0 * (2 ** 1) % 1);
+	freq = f0.linexp(0, 1, 100, 10000);
+	env = EnvGen.ar(Env.sine(sustain, amp * 10 * AmpComp.kr(freq, 100, 0.3)), doneAction:2);
+	trig = LPF.ar(Impulse.ar(0), freq) * PinkNoise.ar(0.1, 1);
+	//son = Klank.ar(`[[1, 1.25, 1.5], [1], [sustain]], freqscale: freq, input: trig);
+	son = FSinOsc.ar(freq) * 0.03;
+	OffsetOut.ar(out, son * env);
+
+}).add;
+)
+
+
+
+(
+SynthDef(\x, { |out, freq, sustain, amp = 0.1|
+
+	var env, son, trig, f0;
+	f0 = freq.explin(500, 9000, 0, 1);
+	f0 = f0 * (2 ** MouseX.kr(1, 18, 1).round(1).lag(1)) % 1;
+//	f0 = IEnvGen.kr(Env([0, 1, 0], 1/2), f0 * (2 ** 1) % 1);
+	freq = MouseY.kr(1, 5) ** f0 * 440; //f0.linexp(0, 1, 100, 10000);
+	env = EnvGen.ar(Env.sine(sustain, amp * 10 * AmpComp.kr(freq, 100, 0.3)), doneAction:2);
+	trig = LPF.ar(Impulse.ar(0), freq) * PinkNoise.ar(0.1, 1);
+	//son = Klank.ar(`[[1, 1.25, 1.5], [1], [sustain]], freqscale: freq, input: trig);
+	son = FSinOsc.ar(freq) * 0.03;
+	OffsetOut.ar(out, son * env);
+
+}).add;
+)
+
+
+
+
+p.size * 0.01 / 60
+
+
+p.size / (3 ** 3) / (3 ** 3)  / (3 ** 3)  / (3 ** 3)
+(3 ** 3) ** 4
+
+(3 ** 3) ** n
+
+p[0].size
+b.scaling
+
+(
+~dropNth = { |p, depth, scaling = 3|
+	var dim = p[0].size;
+	var n = scaling ** dim ** depth;
+	p.select { |x, i| i % n == 0 }
+};
+)
+
+~dropNth.(p, 0).size
+
+(
+Tdef(\x, {
+	~dropNth.(p, 2).do { |point|
+		var freq;
+		freq = point.linlin(0, 240, 500, 9000);
+		(
+			instrument: \x,
+			freq: freq,
+			out: [0, 1, 2], // [0, 1, 1] // at home
+			sustain: 0.01
+		).play;
+		0.1.wait;
+	}
+}).play;
+)
+)
+
+
+
+
+
+
+
 
 
 (instrument:\x, freq:600, sustain: 3).play;
