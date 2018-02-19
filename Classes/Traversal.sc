@@ -88,13 +88,13 @@ Traversal {
 	}
 
 	subTraversal { |index|
-		var newLoc, newTra, newDir, ci, tr;
+		var ci, tr, newLoc, newTra, newDir;
 		if(index >= this.size) {
 			Error("index (%) too large for given space (size: %)".format(index, this.size)).throw
 		};
-		ci = locations.at(index) + this.initialLocation;
+		ci = locations.at(index);// + this.initialLocation;
 		tr = transformations.at(index);
-		newLoc = locations.collect { |x| x.rotatePoint(tr) } / scaling + [ci];
+		newLoc = locations.collect { |x| x.rotatePoint(tr) + ci };
 		newTra = transformations.collect { |x| tr.mulMatrix(x) / scaling };
 		newDir = directions.at(index) * directions;
 		^this.class.new(newTra, newDir, newLoc)
