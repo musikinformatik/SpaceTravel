@@ -97,10 +97,11 @@
 			var index = row.detectIndex { |a| a != 0 };
 			if(index.isNil) {
 				Error(
-					"conversion to permutation formt: "
-					"matrix has incorrect format (only zero entries in row %):\n%".format(j, this)).throw
+					"conversion to permutation format: "
+					"matrix has incorrect format (only zero entries in row %):\n%".format(j, this)
+				).throw
 			};
-			(index + 1) * (row[index].sign)
+			(index + 1) * row[index].sign
 		}
 	}
 
