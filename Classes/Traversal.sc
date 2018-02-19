@@ -87,6 +87,19 @@ Traversal {
 		^this.findPoint(indices.drop(1), point, matrix, direction)
 	}
 
+	subTraversal { |index|
+		var newLoc, newTra, newDir, ci, tr;
+		 // else we just return nil
+		^if(index < this.size) {
+			ci = locations.at(index);
+			tr = transformations.at(index);
+			newLoc = locations.collect { |x| x.rotatePoint(tr) } / scaling + [ci];
+			newTra = transformations.collect { |x| tr.mulMatrix(x) / scaling };
+			newDir = directions.at(index) * directions;
+			this.class.new(newTra, newDir, newLoc)
+		}
+	}
+
 
 	// path generation
 
