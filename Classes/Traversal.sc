@@ -10,7 +10,7 @@ version 0.1
 Traversal {
 
 	var <>transformations, <>directions, <>locations;
-	var <>dimension, <>initialLocation, <>scaling;
+	var <dimension, <>initialLocation, <>scaling;
 	var <>verbose = false;
 
 	*new { |transformations, directions, locations|
@@ -89,15 +89,15 @@ Traversal {
 
 	subTraversal { |index|
 		var newLoc, newTra, newDir, ci, tr;
-		 // else we just return nil
-		^if(index < this.size) {
-			ci = locations.at(index);
-			tr = transformations.at(index);
-			newLoc = locations.collect { |x| x.rotatePoint(tr) } / scaling + [ci];
-			newTra = transformations.collect { |x| tr.mulMatrix(x) / scaling };
-			newDir = directions.at(index) * directions;
-			this.class.new(newTra, newDir, newLoc)
-		}
+		if(index >= this.size) {
+			Error("index (%) too large for given space (size: %)".format(index, this.size)).throw
+		};
+		ci = locations.at(index) + this.initialLocation;
+		tr = transformations.at(index);
+		newLoc = locations.collect { |x| x.rotatePoint(tr) } / scaling + [ci];
+		newTra = transformations.collect { |x| tr.mulMatrix(x) / scaling };
+		newDir = directions.at(index) * directions;
+		^this.class.new(newTra, newDir, newLoc)
 	}
 
 
