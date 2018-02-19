@@ -95,7 +95,11 @@
 	matrix2permute {
 		^this.flop.collect { |row, j|
 			var index = row.detectIndex { |a| a != 0 };
-			if(index.isNil) { Error("matrix has incorrect format: %".format(this)).throw };
+			if(index.isNil) {
+				Error(
+					"conversion to permutation formt: "
+					"matrix has incorrect format (only zero entries in row %):\n%".format(j, this)).throw
+			};
 			(index + 1) * (row[index].sign)
 		}
 	}
