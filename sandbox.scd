@@ -6,102 +6,13 @@ Quarks.install("/Volumes/data/sc/quarks/SpaceTravel");
 Quarks.install("https://github.com/musikinformatik/SpaceTravel");
 
 
-// two useful functions for display
 (
-g = { |w, reihe, dur, color|
-	var j = 1;
-	var max, min, step, scale, points, zoomPoint;
-	var width = w.view.bounds.width * 0.9;
-	var downPoint = Point(1, 1) * width / 2, downZoom = 0, zoom = 0;
-
-	max = reihe.flat.maxItem;
-	min = reihe.flat.minItem;
-	scale = max - min;
-	points = reihe.collect { |pair|
-		pair = pair.linlin(min, max, 10, width - 10);
-		//pair = 180 - pair + min * 2;
-		Point(*pair)
-	};
-
-	zoomPoint = { |point|
-		var dist = point - downPoint;
-		point + (zoom * dist);
-	};
-
-
-	w.drawFunc = w.drawFunc.addFunc({
-		var p;
-		Pen.matrix = [1, 0, 0, -1, 20 , width + 20];
-		Pen.strokeColor = color;
-		Pen.smoothing = false;
-		Pen.width = 1;
-		Pen.moveTo(zoomPoint.(points.first));
-		p = if(dur > 0) { points.keep(j) } { points };
-
-		p.do { |point|
-			Pen.lineTo(zoomPoint.(point))
-		};
-
-		Pen.stroke;
-		j = j + 1;
-	});
-
-	w.view.mouseDownAction = { |v, x, y|
-		downPoint = Point(x, y);
-	};
-
-	w.view.mouseMoveAction = { |v, x, y|
-		var dist;
-		if(downPoint.notNil) {
-			dist = y - downPoint.y;
-			zoom = downZoom + 1 * (dist  / 500);
-			w.refresh;
-		}
-	};
-	w.view.mouseUpAction = { |v, x, y|
-		downZoom = zoom;
-	};
-
-};
-
-z = { |name, path, dur = 0, width = 340|
-	var w = Window(name, Rect(340, 40, 340, 340));
-	w.background = Color.white;
-	w.front;
-
-	g.(w, path, dur, Color.black);
-	if(dur > 0) {
-		fork({ while { w.isClosed.not } { dur.wait; w.refresh } }, AppClock)
-	};
-};
-
-p = { |travel, depth, dur = 0, width|
-	z.(travel.name ? "plan", travel.traversal.generateFullPath(depth), dur, width)
-};
-)
-
-
-(
-z = { |name, path, dur, width|
-	var w = Window(name, Rect(340, 40, 340, 340));
-	var k;
-	w.background = Color.white;
-	w.front;
-	k = SpaceTravelImage(w, w.bounds);
-	if(dur > 0) {
-		fork({ while { w.isClosed.not } { dur.wait; w.refresh } }, AppClock)
-	};
+p = { |travel, depth, dur = 0, width = 340|
+	var path = travel.traversal.generateFullPath(depth);
+	k = SpaceTravelImage(travel.name ? "plan",  Rect(340, 40, width, width));
 	k.addPath(path, dur, Color.black);
 };
-
-p = { |travel, depth, dur = 0, width|
-	z.(travel.name ? "plan", travel.traversal.generateFullPath(depth), dur, width)
-};
-
 )
-
-
-
 
 // post all traversal names
 pathMatch("traversals/*".resolveRelative).collect { |x| x.basename.postln }; "";
@@ -114,9 +25,8 @@ unixCmd("open" + "traversals/HarmoniousHilbert2.hx".resolveRelative);
 SpaceTravel("< { 2 -1 ] 1 [ 1 2 } 2 { 1 -2 ] -1 [ -2 -1 } >").traversal.generateFullPath(3).cs
 
 // some drawings
-p.(SpaceTravel("< { 2 -1 ] 1 [ 1 2 } 2 { 1 -2 ] -1 [ -2 -1 } >"), 5, 0);
-p.(SpaceTravel("< { 2 -1 ] 1 [ 1 2 } 2 { 1 -2 ] -1 [ -2 -1 } >"), 5, 0.01);
-
+z = p.(SpaceTravel("< { 2 -1 ] 1 [ 1 2 } 2 { 1 -2 ] -1 [ -2 -1 } >"), 5, 0);
+p.(SpaceTravel("< { 2 -1 ] 1 [ 1 2 } 2 { 1 -2 ] -1 [ -2 -1 } >"), 6, 0.01);
 
 
 p.(SpaceTravel("< { 2 -1 ] 1 [ 1 2 } 2 { 1 -2 ] -1 [ -2 -1 } >"), 6);
