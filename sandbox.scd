@@ -81,6 +81,28 @@ p = { |travel, depth, dur = 0, width|
 )
 
 
+(
+z = { |name, path, dur, width|
+	var w = Window(name, Rect(340, 40, 340, 340));
+	var k;
+	w.background = Color.white;
+	w.front;
+	k = SpaceTravelImage(w, w.bounds);
+	if(dur > 0) {
+		fork({ while { w.isClosed.not } { dur.wait; w.refresh } }, AppClock)
+	};
+	k.addPath(path, dur, Color.black);
+};
+
+p = { |travel, depth, dur = 0, width|
+	z.(travel.name ? "plan", travel.traversal.generateFullPath(depth), dur, width)
+};
+
+)
+
+
+
+
 // post all traversal names
 pathMatch("traversals/*".resolveRelative).collect { |x| x.basename.postln }; "";
 
@@ -92,6 +114,7 @@ unixCmd("open" + "traversals/HarmoniousHilbert2.hx".resolveRelative);
 SpaceTravel("< { 2 -1 ] 1 [ 1 2 } 2 { 1 -2 ] -1 [ -2 -1 } >").traversal.generateFullPath(3).cs
 
 // some drawings
+p.(SpaceTravel("< { 2 -1 ] 1 [ 1 2 } 2 { 1 -2 ] -1 [ -2 -1 } >"), 5, 0);
 p.(SpaceTravel("< { 2 -1 ] 1 [ 1 2 } 2 { 1 -2 ] -1 [ -2 -1 } >"), 5, 0.01);
 
 
