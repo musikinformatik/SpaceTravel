@@ -1,20 +1,30 @@
-SpaceTravelImage : UserView {
+/*
 
+this utility draws a 2D image of a path
+todo: integrate 3D code
+
+*/
+
+
+SpaceTravelImage  {
+
+	var <window, <task;
 	var <downPoint, <downZoom = 0, <>zoom = 0;
 
-	*new { |parent, bounds|
-		^super.new(parent, bounds).init
+	*new { |title, bounds|
+		^super.new.init(title, bounds)
 	}
 
-	init {
+	init { |title, bounds|
 
-		downPoint = Point(1, 1) * this.bounds.width / 2;
+		window = Window(title, bounds).background_(Color.white);
+		downPoint = Point(1, 1) * window.bounds.width / 2;
 
-		this.mouseDownAction = { |v, x, y|
+		window.view.mouseDownAction = { |v, x, y|
 			downPoint = Point(x, y);
 		};
 
-		this.mouseMoveAction = { |v, x, y|
+		window.view.mouseMoveAction = { |v, x, y|
 			var dist;
 			if(downPoint.notNil) {
 				dist = y - downPoint.y;
@@ -22,17 +32,21 @@ SpaceTravelImage : UserView {
 				this.refresh;
 			}
 		};
-		this.mouseUpAction = { |v, x, y|
+		window.view.mouseUpAction = { |v, x, y|
 			downZoom = zoom;
 		};
+
+		window.front;
 	}
 
 
-	addPath { |reihe, dur, color|
+
+	addPath { |reihe, dur = 0, color|
 		var j = 1;
 		var max, min, step, scale, points, zoomPoint;
-		var width = this.bounds.width * 0.9;
+		var width = window.bounds.width * 0.9;
 
+		color = color ? Color.black;
 
 		max = reihe.flat.maxItem;
 		min = reihe.flat.minItem;
@@ -51,7 +65,9 @@ SpaceTravelImage : UserView {
 		};
 
 
-		drawFunc = drawFunc.addFunc({
+
+
+		window.drawFunc = window.drawFunc.addFunc({
 			var p;
 			Pen.matrix = [1, 0, 0, -1, 20 , width + 20];
 			Pen.strokeColor = color;
@@ -61,16 +77,19 @@ SpaceTravelImage : UserView {
 			p = if(dur > 0) { points.keep(j) } { points };
 
 			p.do { |point|
-				Pen.lineTo(zoomPoint.(point).postln)
+				Pen.lineTo(zoomPoint.(point))
 			};
 
 			Pen.stroke;
 			j = j + 1;
 		});
 
-		this.refresh;
+		if(dur.notNil and: task.isNil) {
+			task = fork({ while { window.isClosed.not } { dur.value.wait; window.refresh } }, AppClock);
+		};
 
 	}
+
 
 }
 
