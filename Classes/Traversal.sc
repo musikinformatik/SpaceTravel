@@ -87,14 +87,15 @@ Traversal {
 		^this.findPoint(indices.drop(1), point, matrix, direction)
 	}
 
-	subTraversal { |index|
+	subTraversal { |index, point|
 		var ci, tr, newLoc, newTra, newDir;
 		if(index >= this.size) {
 			Error("index (%) too large for given space (size: %)".format(index, this.size)).throw
 		};
-		ci = locations.at(index);// + this.initialLocation;
+		point = point ?? { this.initialLocation };
+		ci = locations.at(index) + point;
 		tr = transformations.at(index);
-		newLoc = locations.collect { |x| x.rotatePoint(tr) + ci };
+		newLoc = locations.collect { |x| x.rotatePoint(tr) / scaling + ci };
 		newTra = transformations.collect { |x| tr.mulMatrix(x) / scaling };
 		newDir = directions.at(index) * directions;
 		^this.class.new(newTra, newDir, newLoc)
@@ -191,6 +192,10 @@ Traversal {
 			stream << if(d > 0) { $} } { $] };
 		};
 		stream << ")";
+	}
+
+	storeArgs {
+		^[transformations, directions, locations]
 	}
 
 

@@ -1,4 +1,19 @@
 
+
+a = SpaceTravel("< { 2 -1 ] 1 [ 1 2 } 2 { 1 -2 ] -1 [ -2 -1 } >").traversal;
+a.cs
+a.subTraversal(0).cs;
+a.subTraversal(1).cs;
+a.subTraversal(2).cs;
+a.subTraversal(3).cs;
+
+a.scaling
+b = a.subTraversal(0);
+
+b.scaling
+
+
+
 (
 a = SpaceTravel("< { 2 -1 ] 1 [ 1 2 } 2 { 1 -2 ] -1 [ -2 -1 } >").traversal;
 t = TraversalStack(a, [0, 0, 0]);
@@ -11,10 +26,8 @@ t = TraversalStack(a, [0, 0, 0]);
 	};
 	t.next;
 	res
-}
-)
+};
 
-(
 f = { |reihe, title = "untitled", width = 500, dur = 0.1|
 
 	var max, min, step, scale, mid;
