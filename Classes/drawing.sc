@@ -84,7 +84,7 @@ SpaceTravelImage  {
 			j = j + 1;
 		});
 
-		if(dur.notNil and: task.isNil) {
+		if(dur.notNil and: task.isPlaying.not) {
 			task = fork({ while { window.isClosed.not } { dur.value.wait; window.refresh } }, AppClock);
 		};
 
