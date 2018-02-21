@@ -194,8 +194,16 @@ Traversal {
 		stream << ")";
 	}
 
-	storeArgs {
-		^[transformations, directions, locations]
+	storeOn { |stream|
+		stream << "\n";
+		stream << this.class.name;
+		stream << "(";
+		stream <<< transformations;
+		stream << ",\n";
+		stream <<< directions;
+		stream << ",\n";
+		stream <<< locations;
+		stream << "\n)";
 	}
 
 
