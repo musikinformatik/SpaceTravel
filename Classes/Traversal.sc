@@ -4,7 +4,7 @@ SuperCollider implementation of the SpaceTravel system by Herman Haverkort
 version 0.1
 
 
-
+hello, this is Herman
 */
 
 Traversal {
