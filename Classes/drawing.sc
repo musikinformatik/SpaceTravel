@@ -43,14 +43,13 @@ SpaceTravelImage  {
 
 	addPath { |reihe, dur = 0, color|
 		var j = 1;
-		var max, min, step, scale, points, zoomPoint;
+		var max, min, step, points, zoomPoint;
 		var width = window.bounds.width * 0.9;
 
 		color = color ? Color.black;
 
 		max = reihe.flat.maxItem;
 		min = reihe.flat.minItem;
-		scale = max - min;
 
 		points = reihe.collect { |pair|
 			pair = pair.linlin(min, max, 10, width - 10);
