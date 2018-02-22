@@ -3,6 +3,10 @@
 a = SpaceTravel("< { 2 -1 ] 1 [ 1 2 } 2 { 1 -2 ] -1 [ -2 -1 } >").traversal;
 a.cs
 a.subTraversal(0).cs;
+a.subTraversal(0).subTraversal(0).cs;
+a.subTraversal(0).subTraversal(1).cs;
+a.subTraversal(0).subTraversal(2).cs;
+a.subTraversal(0).subTraversal(3).cs;
 a.subTraversal(1).cs;
 a.subTraversal(2).cs;
 a.subTraversal(3).cs;

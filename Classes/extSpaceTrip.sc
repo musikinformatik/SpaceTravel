@@ -128,7 +128,7 @@
 				p[i] = p[i] + (scaleFactor.value * each.sign)
 			};
 			p
-		}).centerPath
+		})
 	}
 
 	centerPath {

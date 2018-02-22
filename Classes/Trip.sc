@@ -9,7 +9,7 @@ Trip : Traversal {
 
 	rotatedTransformationsAt { |index|
 		var tr = transformations[index];
-		^transformations.collect { |x, i| tr.mulMatrix(x) / scaling } // maybe the other way round
+		^transformations.collect { |x, i| tr.mulMatrix(x) * scaling } // maybe the other way round
 	}
 
 	rotatedDirectionsAt { |index|

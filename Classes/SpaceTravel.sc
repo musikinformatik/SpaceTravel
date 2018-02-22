@@ -45,7 +45,7 @@ SpaceTravel {
 		transformations = this.transformationCoordinates;
 		locations = this.locationCoordinates;
 
-		traversal = Traversal(transformations, directions, locations);
+		traversal = Traversal(transformations, directions, locations).standardize;
 
 	}
 

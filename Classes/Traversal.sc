@@ -9,19 +9,19 @@ version 0.1
 
 Traversal {
 
-	var <>transformations, <>directions, <>locations;
-	var <dimension, <>initialLocation, <>scaling;
+	var <>transformations, <>directions, <>locations, root;
+	var <dimension, <>scaling;
 	var <>verbose = false;
 
-	*new { |transformations, directions, locations|
-		^super.newCopyArgs(transformations, directions, locations).standardize
+	*new { |transformations, directions, locations, root|
+		^super.newCopyArgs(transformations, directions, locations, root)
 	}
 
 	size {
 		^transformations.size
 	}
 
-	standardize {
+	standardize { |origin = 0, argScaling = 1, direction = 1|
 		var n = transformations.size;
 
 		dimension = transformations.first.size;
@@ -35,12 +35,17 @@ Traversal {
 			if(x.isKindOf(Ref)) { directions[i] = -1 }
 		};
 
-		initialLocation = (0.5 ! dimension);
-
 		// for 2 ** d
 
+		scaling = argScaling / (n ** dimension.reciprocal);
+		locations = locations / (n ** dimension.reciprocal);
+		locations = locations.centerPath + [origin];
 
-		scaling = n ** dimension.reciprocal;
+		if(direction < 0) {
+			locations = locations.reverse;
+			transformations = transformations.reverse;
+			directions = directions.reverse;
+		};
 
 		if(verbose) {
 			"\ntransformations:".postln;
@@ -52,6 +57,7 @@ Traversal {
 		};
 
 	}
+
 
 	// indexing
 
@@ -79,26 +85,31 @@ Traversal {
 		};
 		if(direction < 0) { i = transformations.size - 1 - i }; // check if wrapping should be considered here
 		ci = locations[i];
-		point = point ?? { this.initialLocation };
 		if(indices.size == 1) { ^ci + point };
 		matrix = matrix ?? { this.calcInitialMatrix(indices.size) };
 		point = point + ci.rotatePoint(matrix);
-		matrix = matrix.mulMatrix(transformations[i]) / scaling;
+		matrix = matrix.mulMatrix(transformations[i]) * scaling;
 		^this.findPoint(indices.drop(1), point, matrix, direction)
 	}
 
-	subTraversal { |index, point|
-		var ci, tr, newLoc, newTra, newDir;
+	subTraversal { |index|
+		var ci, tr, dir, newLoc, newTra, newDir, baseTraversal;
+
 		if(index >= this.size) {
 			Error("index (%) too large for given space (size: %)".format(index, this.size)).throw
 		};
-		point = point ?? { this.initialLocation };
-		ci = locations.at(index) + point;
+
+		ci = locations.at(index);
 		tr = transformations.at(index);
-		newLoc = locations.collect { |x| x.rotatePoint(tr) / scaling + ci };
-		newTra = transformations.collect { |x| tr.mulMatrix(x) / scaling };
-		newDir = directions.at(index) * directions;
-		^this.class.new(newTra, newDir, newLoc)
+		dir = directions.at(index);
+
+		baseTraversal = if(root.isNil) { this } { root };
+
+		newLoc = baseTraversal.locations.collect { |x| x.rotatePoint(tr) * scaling };
+		newTra = baseTraversal.transformations.collect { |x| tr.mulMatrix(x) };
+		newDir = baseTraversal.directions * dir;
+
+		^this.class.new(newTra, newDir, newLoc, root ? this).standardize(ci, 1, dir)
 	}
 
 
@@ -117,7 +128,7 @@ Traversal {
 
 				var ci = locations[i];
 				var tr = transformations[i];
-				var newMatrix = matrix.mulMatrix(tr) / scaling;
+				var newMatrix = matrix.mulMatrix(tr) * scaling;
 				var newOrigin = point + ci.rotatePoint(matrix);
 				var newDirection = direction * directions[i];
 
@@ -143,16 +154,15 @@ Traversal {
 		^list
 	}
 
-	followPath { |func, depth|
+	followPath { |func, depth, origin = 0|
 		var m = this.calcInitialMatrix(depth);
-		var p = this.initialLocation;
-		this.generatePath(func, p, m, 1, depth);
+		this.generatePath(func, origin, m, 1, depth);
 	}
 
 
 	fillSpace { |depth, func|
 		var space = Array.fillND((scaling ** depth) ! this.dimension);
-		var mul = scaling.reciprocal;
+		var mul = scaling;
 		var n = this.size * depth;
 
 		var coords = List.new(n);
@@ -178,7 +188,7 @@ Traversal {
 		var n = this.dimension;
 		^{ |i|
 			{ |j|
-				if(i == j) { this.scaling ** depth } { 0 }
+				if(i == j) { this.scaling.reciprocal ** depth } { 0 }
 			}.dup(n)
 		}.dup(n)
 	}
@@ -206,6 +216,10 @@ Traversal {
 		stream << "\n)";
 	}
 
+
+	plotPointPath {
+		^this.locations.plotPointPath
+	}
 
 }
 
