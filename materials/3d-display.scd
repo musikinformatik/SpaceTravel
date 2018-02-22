@@ -79,19 +79,19 @@ f = { |paths, title|
 
 (
 a = SpaceTravel.readFile("../traversals/HarmoniousHilbert3.hx".resolveRelative);
-x = f.([a.traversal.generateFullPath(3).centerPath] * 0.1, a.name);
+x = f.([a.traversal.generateFullPath(3).centerPath] * 0.3, a.name);
 )
 
 (
 a = SpaceTravel.readFile("../traversals/Peano3.hx".resolveRelative);
-x = f.([a.traversal.generateFullPath(2).centerPath] * 0.1, a.name);
+x = f.([a.traversal.generateFullPath(2).centerPath] * 0.3, a.name);
 )
 
 
 (
 a = SpaceTravel.readFile("../traversals/HarmoniousHilbert2.hx".resolveRelative);
 p = a.traversal.generateFullPath(4).collect { |x| x ++ 3.rand };
-f.([p.centerPath] * 0.1, a.name);
+f.([p.centerPath] * 0.2, a.name);
 )
 
 

@@ -25,7 +25,9 @@ unixCmd("open" + "traversals/HarmoniousHilbert2.hx".resolveRelative);
 SpaceTravel("< { 2 -1 ] 1 [ 1 2 } 2 { 1 -2 ] -1 [ -2 -1 } >").traversal.generateFullPath(3).cs
 
 // some drawings
-z = p.(SpaceTravel("< { 2 -1 ] 1 [ 1 2 } 2 { 1 -2 ] -1 [ -2 -1 } >"), 5, 0);
+p.(SpaceTravel("< { 2 -1 ] 1 [ 1 2 } 2 { 1 -2 ] -1 [ -2 -1 } >"), 2, 0.1);
+
+
 p.(SpaceTravel("< { 2 -1 ] 1 [ 1 2 } 2 { 1 -2 ] -1 [ -2 -1 } >"), 6, 0.01);
 
 
@@ -37,6 +39,7 @@ p.(SpaceTravel.readFile("traversals/DoubleGray2.hx".resolveRelative), 4);
 p.(SpaceTravel.readFile("traversals/Peano2.hx".resolveRelative), 3, 0.01);
 p.(SpaceTravel.readFile("traversals/InsideOut2.hx".resolveRelative), 5, 0);
 
+p.(SpaceTravel.readFile("traversals/Z2.hx".resolveRelative), 5, 0.1);
 
 
 
