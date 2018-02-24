@@ -99,17 +99,18 @@ Traversal {
 			Error("index (%) too large for given space (size: %)".format(index, this.size)).throw
 		};
 
-		ci = locations.at(index);
-		tr = transformations.at(index);
-		dir = directions.at(index);
-
 		baseTraversal = if(root.isNil) { this } { root };
 
-		newLoc = baseTraversal.locations.collect { |x| x.rotatePoint(tr) * scaling };
-		newTra = baseTraversal.transformations.collect { |x| tr.mulMatrix(x) };
-		newDir = baseTraversal.directions * dir;
+		ci = baseTraversal.locations.at(index);
+		tr = baseTraversal.transformations.at(index);
+		dir = baseTraversal.directions.at(index);
 
-		^this.class.new(newTra, newDir, newLoc, root ? this).standardize(ci, 1, dir)
+
+		newLoc = locations.collect { |x| x.rotatePoint(tr) * scaling };
+		newTra = transformations.collect { |x| tr.mulMatrix(x) };
+		newDir = directions * dir;
+
+		^this.class.new(newTra, newDir, newLoc, root ? this).standardize(ci, scaling, dir)
 	}
 
 
