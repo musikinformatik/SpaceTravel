@@ -6,6 +6,7 @@ TraversalStack {
 	var <index, <depth;
 	var <indexStack, <traversalStack;
 	var <>maxDepth;
+	var <>verbose = true;
 
 	*new { |traversal, indices|
 		^super.newCopyArgs(traversal, indices).init
@@ -31,7 +32,7 @@ TraversalStack {
 				index = 0;
 				indexStack = indexStack.add(index)
 			};
-
+			if(verbose) { "travel down, depth %, index %".format(depth, index).postln };
 			traversal = traversal.subTraversal(index);
 			traversalStack = traversalStack.add(traversal);
 		};
@@ -50,6 +51,7 @@ TraversalStack {
 			traversalStack.pop;
 			traversal = parentTraversal;
 			depth = depth - 1;
+			if(verbose) { "travel up, depth %, index %".format(depth, index).postln };
 		};
 		^traversal
 	}
@@ -63,6 +65,7 @@ TraversalStack {
 		} {
 			index = index + 1;
 			indexStack[ii] = index;
+			if(verbose) { "travel next, depth %, index %".format(depth, index).postln };
 		}
 	}
 
@@ -72,6 +75,7 @@ TraversalStack {
 		index = indexStack[size - 1];
 		traversal = traversalStack[size - 1];
 		if(traversal.size <= (index + 1) or: { depth > size }) {
+			"travelling ...".postln;
 			this.travelUp;
 			this.travelNext;
 			this.travelDown;
