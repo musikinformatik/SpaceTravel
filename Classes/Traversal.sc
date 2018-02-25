@@ -10,7 +10,7 @@ hello, this is Herman
 Traversal {
 
 	var <>transformations, <>directions, <>locations, root;
-	var <dimension, <>scaling;
+	var <dimension, <>scaling, <direction;
 	var <>verbose = false;
 
 	*new { |transformations, directions, locations, root|
@@ -21,7 +21,7 @@ Traversal {
 		^transformations.size
 	}
 
-	standardize { |origin = 0, argScaling = 1, direction = 1|
+	standardize { |origin = 0, argScaling = 1, argDirection = 1|
 		var n = transformations.size;
 
 		dimension = transformations.first.size;
@@ -41,11 +41,15 @@ Traversal {
 		locations = locations / (n ** dimension.reciprocal);
 		locations = locations.centerPath + [origin];
 
+		direction = argDirection;
+
+		/*
 		if(direction < 0) {
 			locations = locations.reverse;
 			transformations = transformations.reverse;
 			directions = directions.reverse;
 		};
+		*/
 
 		if(verbose) {
 			"\ntransformations:".postln;
@@ -93,24 +97,27 @@ Traversal {
 	}
 
 	subTraversal { |index|
-		var ci, tr, dir, newLoc, newTra, newDir, baseTraversal;
+		var ci, tr, dir, newLoc, newTra, newDir, baseTraversal, lastIndex;
 
-		if(index >= this.size) {
+		lastIndex = this.size - 1;
+
+		if(index > lastIndex) {
 			Error("index (%) too large for given space (size: %)".format(index, this.size)).throw
 		};
 
 		baseTraversal = if(root.isNil) { this } { root };
 
-		ci = baseTraversal.locations.at(index);
-		tr = baseTraversal.transformations.at(index);
-		dir = baseTraversal.directions.at(index);
+		if(baseTraversal.direction < 0) { index = lastIndex - index };
 
+		ci = baseTraversal.locations[index];
+		tr = baseTraversal.transformations[index];
+		dir = baseTraversal.directions[index];
 
-		newLoc = locations.collect { |x| x.rotatePoint(tr) * scaling };
-		newTra = transformations.collect { |x| tr.mulMatrix(x) };
+		newLoc = locations.collect { |point| point + ci.rotatePoint(tr) };
+		newTra = transformations.collect { |matrix| matrix.mulMatrix(tr) * baseTraversal.scaling };
 		newDir = directions * dir;
 
-		^this.class.new(newTra, newDir, newLoc, root ? this).standardize(ci, scaling, dir)
+		^this.class.new(newTra, newDir, newLoc, root ? this).standardize(ci, 1, dir)
 	}
 
 
