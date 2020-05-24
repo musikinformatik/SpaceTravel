@@ -4,6 +4,7 @@ a = SpaceTravel("< { 2 -1 ] 1 [ 1 2 } 2 { 1 -2 ] -1 [ -2 -1 } >").traversal;
 a.cs
 a.subTraversal(0).cs;
 a.subTraversal(0).subTraversal(0).cs;
+
 a.subTraversal(0).subTraversal(1).cs;
 a.subTraversal(0).subTraversal(2).cs;
 a.subTraversal(0).subTraversal(3).cs;
@@ -17,7 +18,10 @@ b = a.subTraversal(0);
 b.scaling
 
 a = SpaceTravel("< { 2 -1 ] 1 [ 1 2 } 2 { 1 -2 ] -1 [ -2 -1 } >").traversal;
-f = { |a, i, j| a.subTraversal(i).subTraversal(j).locations };
+
+a.generateFullPath(3).plotPointPath
+
+f = { |a, i, j| a.subTraversal(i).subTraversal(j).generateFullPath(3) };
 x = { |i| { |j| f.(a, i, j) } ! 4 } ! 4;
 x.flatten(2).plotPointPath
 

@@ -9,47 +9,35 @@ hello, this is Herman
 
 Traversal {
 
-	var <>transformations, <>directions, <>locations, root;
-	var <dimension, <>scaling, <direction;
+	var <>transformations, <>directions, <>locations;
+	var <>t0, <>d0, <>l0;
+
+	var <dimension, <scaling;
 	var <>verbose = false;
 
-	*new { |transformations, directions, locations, root|
-		^super.newCopyArgs(transformations, directions, locations, root)
+	*new { |transformations, directions, locations, t0, d0, l0|
+		^super.newCopyArgs(transformations, directions, locations, t0, d0, l0).init
 	}
 
 	size {
 		^transformations.size
 	}
 
-	standardize { |origin = 0, argScaling = 1, argDirection = 1|
-		var n = transformations.size;
+	init {
 
 		dimension = transformations.first.size;
 
-		if(locations.size != n) {
+		if(locations.size != this.size) {
 			Error("locations and transformations should match: one location less").throw
 		};
-
 		// backward traversals are encoded as refs.
 		transformations.do { |x, i|
 			if(x.isKindOf(Ref)) { directions[i] = -1 }
 		};
 
-		// for 2 ** d
+			// for 2 ** d
 
-		scaling = argScaling / (n ** dimension.reciprocal);
-		locations = locations / (n ** dimension.reciprocal);
-		locations = locations.centerPath + [origin];
-
-		direction = argDirection;
-
-		/*
-		if(direction < 0) {
-			locations = locations.reverse;
-			transformations = transformations.reverse;
-			directions = directions.reverse;
-		};
-		*/
+		scaling = 1 / (this.size ** dimension.reciprocal);
 
 		if(verbose) {
 			"\ntransformations:".postln;
@@ -62,6 +50,19 @@ Traversal {
 
 	}
 
+	standardize {
+
+		locations = locations.centerPath;
+
+
+
+
+		t0 = t0 ?? { this.calcInitialMatrix(1) };
+		d0 = d0 ? 1;
+		l0 = l0 ?? { 0 ! dimension };
+
+	}
+
 
 	// indexing
 
@@ -70,34 +71,37 @@ Traversal {
 	}
 
 	at { |indices|
-		var m = this.calcInitialMatrix(1); // scaling down here.
 		^if(indices.containsSeqColl) {
 			indices.flop.collect { |is| // not the most efficient way, but works for now.
-				this.findPoint(is, matrix: m)
+				this.findPoint(is)
 			}
 		} {
-			this.findPoint(indices, matrix: m)
+			this.findPoint(indices)
 		}
 	}
 
-	findPoint { |indices, point, matrix, direction = 1|
+	findPoint { |indices, point, matrix, direction|
 		var ci, i;
+
+		point = point ? l0;
+		matrix = matrix ? t0;
+		direction = direction ? d0;
+
 		if(indices.isEmpty) { ^point };
 		i = indices.first;
 		if(i >= this.size) {
 			Error("index (%) too large for given space (size: %)".format(i, this.size)).throw
 		};
-		if(direction < 0) { i = transformations.size - 1 - i }; // check if wrapping should be considered here
+		if(direction < 0) { i = transformations.lastIndex - i }; // check if wrapping should be considered here
 		ci = locations[i];
 		if(indices.size == 1) { ^ci + point };
-		matrix = matrix ?? { this.calcInitialMatrix(indices.size) };
 		point = point + ci.rotatePoint(matrix);
 		matrix = matrix.mulMatrix(transformations[i]) * scaling;
 		^this.findPoint(indices.drop(1), point, matrix, direction)
 	}
 
 	subTraversal { |index|
-		var ci, tr, dir, newLoc, newTra, newDir, baseTraversal, lastIndex;
+		var ci, tr, di, newMatrix, newDirection, newOrigin, lastIndex;
 
 		lastIndex = this.size - 1;
 
@@ -105,19 +109,20 @@ Traversal {
 			Error("index (%) too large for given space (size: %)".format(index, this.size)).throw
 		};
 
-		baseTraversal = if(root.isNil) { this } { root };
+		if(d0 < 0) { index = lastIndex - index };
 
-		if(baseTraversal.direction < 0) { index = lastIndex - index };
+		ci = locations[index];
+		tr = transformations[index];
+		di = directions[index];
 
-		ci = baseTraversal.locations[index];
-		tr = baseTraversal.transformations[index];
-		dir = baseTraversal.directions[index];
+		newMatrix = t0.mulMatrix(tr) * scaling;
+		newDirection = d0 * di;
+		newOrigin = l0 + ci.rotatePoint(t0);
 
-		newLoc = locations.collect { |point| point + ci.rotatePoint(tr) };
-		newTra = transformations.collect { |matrix| matrix.mulMatrix(tr) * baseTraversal.scaling };
-		newDir = directions * dir;
+		// once this works, we can just make an object that has pnly the last three,
+		// and the traversal as instance variables
 
-		^this.class.new(newTra, newDir, newLoc, root ? this).standardize(ci, 1, dir)
+		^this.class.new(transformations, directions, locations, newMatrix, newDirection, newOrigin)
 	}
 
 
@@ -127,18 +132,26 @@ Traversal {
 	generatePath { |func, point, matrix, direction, depth|
 		var selector;
 
+
+		point = point ? l0;
+		matrix = matrix ? t0;
+		direction = direction ? d0;
+
+
 		if(depth <= 0) {
 			func.value(point, matrix, direction)
 		} {
 
 			selector = if(direction > 0) { \do } { \reverseDo };
-			this.size.perform(selector) { |i|
+			this.size.perform(selector) { |index|
 
-				var ci = locations[i];
-				var tr = transformations[i];
+				var ci = locations[index];
+				var tr = transformations[index];
+				var di = directions[index];
+
 				var newMatrix = matrix.mulMatrix(tr) * scaling;
+				var newDirection = direction * di;
 				var newOrigin = point + ci.rotatePoint(matrix);
-				var newDirection = direction * directions[i];
 
 				if(verbose) {
 					"c: % c_i: % matrix: %\nnew matrix: % new point: % direction: % -> %\n\n"
